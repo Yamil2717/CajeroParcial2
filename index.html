@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Cajero Automático</title>
+    <link rel="stylesheet" href="src/index.css" />
+</head>
+
+<body>
+    <h1>Simulador de Cajero Automático</h1>
+
+    <div id="saldo">
+        <h2>Saldo actual: <span id="saldo-actual">$0.00</span></h2>
+    </div>
+
+    <div id="acciones">
+        <h2>Acciones:</h2>
+        <button id="agregar-saldo">Agregar Saldo</button>
+        <button id="retirar-saldo">Retirar Saldo</button>
+        <button id="consultar-saldo">Consultar Saldo</button>
+    </div>
+
+    <div id="billetes">
+        <h2>Billetes:</h2>
+    </div>
+
+    <div id="recibo">
+        <h2>Historial de transacciones:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody id="transacciones"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let saldo = 0;
+        const saldoActualElement = document.getElementById("saldo-actual");
+        const transaccionesElement = document.getElementById("transacciones");
+        const billetesElement = document.getElementById("billetes");
+
+        function esMontoValido(monto) {
+            const valoresBilletes = [5000, 10000, 20000, 50000, 100000];
+            for (let valorBillete of valoresBilletes) {
+                if (monto % valorBillete === 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function actualizarSaldo() {
+            saldoActualElement.textContent = `$${saldo.toFixed(2)}`;
+        }
+
+        function agregarSaldo() {
+            const monto = parseFloat(prompt("Ingrese el monto a agregar:"));
+            if (!esMontoValido(monto)) {
+                alert("Ingrese un monto que sea múltiplo de los valores de los billetes.");
+                return;
+            }
+            if (!isNaN(monto) && monto > 0) {
+                saldo += monto;
+                actualizarSaldo();
+                const transaccionType = document.createElement("td");
+                transaccionType.textContent = 'Se agregó saldo';
+                const transaccionMount = document.createElement("td");
+                transaccionMount.textContent = `$${monto.toFixed(2)}`;
+                const transaccionDate = document.createElement("td");
+                transaccionDate.textContent = `${new Date().toLocaleString()}`;
+                const transaccionRow = document.createElement("tr");
+                transaccionRow.appendChild(transaccionType);
+                transaccionRow.appendChild(transaccionMount);
+                transaccionRow.appendChild(transaccionDate);
+                transaccionesElement.appendChild(transaccionRow);
+            } else {
+                alert("Ingrese un monto válido.");
+            }
+        }
+
+        function retirarSaldo() {
+            const monto = parseFloat(prompt("Ingrese el monto a retirar:"));
+            if (!esMontoValido(monto)) {
+                alert("Ingrese un monto que sea múltiplo de los valores de los billetes.");
+                return;
+            }
+            if (!isNaN(monto) && monto > 0) {
+                if (monto <= saldo) {
+                    saldo -= monto;
+                    actualizarSaldo();
+                    const transaccionType = document.createElement("td");
+                    transaccionType.textContent = 'Se retiró saldo';
+                    const transaccionMount = document.createElement("td");
+                    transaccionMount.textContent = `$${monto.toFixed(2)}`;
+                    const transaccionDate = document.createElement("td");
+                    transaccionDate.textContent = `${new Date().toLocaleString()}`;
+                    const transaccionRow = document.createElement("tr");
+                    transaccionRow.appendChild(transaccionType);
+                    transaccionRow.appendChild(transaccionMount);
+                    transaccionRow.appendChild(transaccionDate);
+                    transaccionesElement.appendChild(transaccionRow);
+                    mostrarBilletes(monto);
+                } else {
+                    alert("Saldo insuficiente.");
+                }
+            } else {
+                alert("Ingrese un monto válido.");
+            }
+        }
+
+        function mostrarBilletes(monto) {
+            billetesElement.innerHTML = "";
+            const billetesImgs = [
+                "src/img/Billete-5000.jpg",
+                "src/img/Billete-10000.jpg",
+                "src/img/Billete-20000.jpg",
+                "src/img/Billete-50000.jpg",
+                "src/img/Billete-100000.jpg"
+            ];
+            let remainingAmount = monto;
+            for (let i = billetesImgs.length - 1; i >= 0; i--) {
+                const billValue = parseInt(billetesImgs[i].split("-")[1].split(".")[0]);
+                const billCount = Math.floor(remainingAmount / billValue);
+                remainingAmount -= billCount * billValue;
+                for (let j = 0; j < billCount; j++) {
+                    const billeteImg = document.createElement("img");
+                    billeteImg.src = billetesImgs[i];
+                    billetesElement.appendChild(billeteImg);
+                }
+            }
+        }
+
+        function consultarSaldo() {
+            alert(`Saldo actual: $${saldo.toFixed(2)}`);
+        }
+
+        document.getElementById("agregar-saldo").addEventListener("click", agregarSaldo);
+        document.getElementById("retirar-saldo").addEventListener("click", retirarSaldo);
+        document.getElementById("consultar-saldo").addEventListener("click", consultarSaldo);
+
+        actualizarSaldo();
+
+    </script>
+</body>
+
+</html>
